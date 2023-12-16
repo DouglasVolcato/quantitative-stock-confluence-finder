@@ -1,0 +1,106 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// Author: Douglas_Volcato
+//Some lines are commented due to TradingView line quantity limit
+
+//@version=5
+indicator("Quantitative stock confluence finder", overlay=true)
+
+intraday_analysis = input(false, 'Use day openning price as source')
+source_price_input = input.float(4920.00, 'Source price')
+
+sma_length = input(25, title="Simple moving average length")
+sma_band_distance = input(10, title="Moving average bands distance")
+sma_band_line_width = input(1, title="Moving average bands line width")
+sma_band_line_color = input(color.white, title="Moving average bands line color")
+
+distance_from_source_price_band = input(16, title="Distance from source price bands")
+source_price_band_width = input(7, title="Source price bands width")
+source_price_band_line_color = input(color.yellow, title="Source price bands line color")
+source_price_band_line_width = input(1, title="Source price bands line width")
+source_price_band_above_bg_color = input(color.red, title="Source price bands above background color")
+source_price_band_below_bg_color = input(color.green, title="Source price bands below background color")
+source_price_band_transp = input(90, title="Source price bands backgroung transparency")
+
+slow_stochastic_length = input(20, title = 'Slow stochastic length')
+slow_stochastic_above = input(80, title = 'Slow stochastic signal above')
+slow_stochastic_below = input(20, title = 'Slow stochastic signal below')
+slow_stochastic_upper_color = input(color.green, title = 'Slow stochastic signal upper arrow color')
+slow_stochastic_lower_color = input(color.red, title = 'Slow stochastic signal lower arrow color')
+
+percentage_distance = input.float(0.5, title="Percentage Distance (%)", minval=0.1, maxval=10, step=0.1)
+percentage_line_width = input(2, title="Percentage line width")
+percentage_above_color = input(color.red, title="Percentage line color")
+percentage_below_color = input(color.green, title="Percentage line color")
+
+[do,dh,dl] = request.security(syminfo.tickerid, "D", [open,high,low], lookahead=barmerge.lookahead_on)
+source_price = intraday_analysis ? source_price_input : do
+
+//sma bands
+sma_value = ta.sma(close, sma_length)
+plot(sma_value, color=color.aqua, linewidth=sma_band_line_width)
+plot(sma_value + (sma_band_distance * 1), color=sma_band_line_color, linewidth=sma_band_line_width)
+plot(sma_value + (sma_band_distance * 2), color=sma_band_line_color, linewidth=sma_band_line_width)
+// plot(sma_value + (sma_band_distance * 3), color=sma_band_line_color, linewidth=sma_band_line_width)
+// plot(sma_value + (sma_band_distance * 4), color=sma_band_line_color, linewidth=sma_band_line_width)
+plot(sma_value - (sma_band_distance * 1), color=sma_band_line_color, linewidth=sma_band_line_width)
+plot(sma_value - (sma_band_distance * 2), color=sma_band_line_color, linewidth=sma_band_line_width)
+// plot(sma_value - (sma_band_distance * 3), color=sma_band_line_color, linewidth=sma_band_line_width)
+// plot(sma_value - (sma_band_distance * 4), color=sma_band_line_color, linewidth=sma_band_line_width)
+
+//distance from day opening lines
+plot(source_price, title="Open", color=color.aqua,linewidth=source_price_band_line_width)
+line1 = plot(source_price + (distance_from_source_price_band * 1), title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+line2 = plot(source_price + (distance_from_source_price_band * 1) + source_price_band_width, title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+fill(line1, line2, color=color.new(source_price_band_above_bg_color, source_price_band_transp))
+line3 = plot(source_price + (distance_from_source_price_band * 2), title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+line4 = plot(source_price + (distance_from_source_price_band * 2) + source_price_band_width, title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+fill(line3, line4, color=color.new(source_price_band_above_bg_color, source_price_band_transp))
+line5 = plot(source_price + (distance_from_source_price_band * 3), title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+line6 = plot(source_price + (distance_from_source_price_band * 3) + source_price_band_width, title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+fill(line5, line6, color=color.new(source_price_band_above_bg_color, source_price_band_transp))
+// line7 = plot(source_price + (distance_from_source_price_band * 4), title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+// line8 = plot(source_price + (distance_from_source_price_band * 4) + source_price_band_width, title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+// fill(line7, line8, color=color.new(source_price_band_above_bg_color, source_price_band_transp))
+line9 = plot(source_price - (distance_from_source_price_band * 1), title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+line10 = plot(source_price - (distance_from_source_price_band * 1) - source_price_band_width, title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+fill(line9, line10, color=color.new(source_price_band_below_bg_color, source_price_band_transp))
+line11 = plot(source_price - (distance_from_source_price_band * 2), title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+line12 = plot(source_price - (distance_from_source_price_band * 2) - source_price_band_width, title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+fill(line11, line12, color=color.new(source_price_band_below_bg_color, source_price_band_transp))
+line13 = plot(source_price - (distance_from_source_price_band * 3), title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+line14 = plot(source_price - (distance_from_source_price_band * 3) - source_price_band_width, title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+fill(line13, line14, color=color.new(source_price_band_below_bg_color, source_price_band_transp))
+// line15 = plot(source_price - (distance_from_source_price_band * 4), title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+// line16 = plot(source_price - (distance_from_source_price_band * 4) - source_price_band_width, title="Open", color=source_price_band_line_color,linewidth=source_price_band_line_width)
+// fill(line15, line16, color=color.new(source_price_band_below_bg_color, source_price_band_transp))
+
+//slow stochastic signal
+last_candle_stoch_value = ta.stoch(close[1], high[1], low[1], slow_stochastic_length)
+arrow_direction = 0
+if (last_candle_stoch_value >= slow_stochastic_above) 
+    arrow_direction := -1
+else if (last_candle_stoch_value <= slow_stochastic_below) 
+    arrow_direction := 1
+else
+    arrow_direction := 0
+plotarrow(arrow_direction, colordown=slow_stochastic_lower_color,colorup=slow_stochastic_upper_color, offset=1,maxheight=17)
+
+//percentage zones
+percentage_distance_value = (percentage_distance * source_price) / 100
+plot(source_price + percentage_distance_value, "1", color=percentage_above_color, linewidth=percentage_line_width, style = plot.style_circles)
+plot(source_price + 2 * percentage_distance_value, "2", color=percentage_above_color, linewidth=percentage_line_width, style = plot.style_circles)
+plot(source_price + 3 * percentage_distance_value, "3", color=percentage_above_color, linewidth=percentage_line_width, style = plot.style_circles)
+plot(source_price + 4 * percentage_distance_value, "4", color=percentage_above_color, linewidth=percentage_line_width, style = plot.style_circles)
+plot(source_price + 5 * percentage_distance_value, "4", color=percentage_above_color, linewidth=percentage_line_width, style = plot.style_circles)
+// plot(source_price + 6 * percentage_distance_value, "4", color=percentage_above_color, linewidth=percentage_line_width, style = plot.style_circles)
+// plot(source_price + 7 * percentage_distance_value, "4", color=percentage_above_color, linewidth=percentage_line_width, style = plot.style_circles)
+// plot(source_price + 8 * percentage_distance_value, "4", color=percentage_above_color, linewidth=percentage_line_width, style = plot.style_circles)
+plot(source_price - percentage_distance_value, "-1", color=percentage_below_color, linewidth=percentage_line_width, style = plot.style_circles)
+plot(source_price - 2 * percentage_distance_value, "-2", color=percentage_below_color, linewidth=percentage_line_width, style = plot.style_circles)
+plot(source_price - 3 * percentage_distance_value, "-3", color=percentage_below_color, linewidth=percentage_line_width, style = plot.style_circles)
+plot(source_price - 4 * percentage_distance_value, "-4", color=percentage_below_color, linewidth=percentage_line_width, style = plot.style_circles)
+plot(source_price - 5 * percentage_distance_value, "-4", color=percentage_below_color, linewidth=percentage_line_width, style = plot.style_circles)
+// plot(source_price - 6 * percentage_distance_value, "-4", color=percentage_below_color, linewidth=percentage_line_width, style = plot.style_circles)
+// plot(source_price - 7 * percentage_distance_value, "-4", color=percentage_below_color, linewidth=percentage_line_width, style = plot.style_circles)
+// plot(source_price - 8 * percentage_distance_value, "-4", color=percentage_below_color, linewidth=percentage_line_width, style = plot.style_circles)
+
